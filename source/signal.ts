@@ -1,14 +1,29 @@
-export type ChangeListener = () => void;
+
+export type SignalChangeListener = () => void;
+export type SignalSubscription = { subscribe: () => void; unsubscribe: () => void };
 
 export type Signal<Value> = {
   (): Value;
   value(): Value;
   emit(value: Value): void;
-  subscribe(listener: ChangeListener): void;
+  subscribe(listener: SignalChangeListener): SignalSubscription;
+  unsubscribe(listener: SignalChangeListener): void;
+  changeListenerCount(): number;
 };
 
 export function createSignal<Value>(value: Value): Signal<Value> {
-  const changeListeners = new Set<ChangeListener>();
+  const changeListeners = new Set<SignalChangeListener>();
+
+  function subscribe(listener: SignalChangeListener): SignalSubscription {
+    const subscription = {
+      subscribe: () => changeListeners.add(listener),
+      unsubscribe: () => changeListeners.delete(listener),
+    };
+
+    subscription.subscribe();
+
+    return subscription;
+  }
 
   function signal(): Value {
     return value;
@@ -16,16 +31,20 @@ export function createSignal<Value>(value: Value): Signal<Value> {
 
   signal.value = () => value;
 
-  signal.subscribe = (listener: ChangeListener) => {
-    changeListeners.add(listener);
+  signal.subscribe = subscribe;
+
+  signal.unsubscribe = (listener: SignalChangeListener) => {
+    changeListeners.delete(listener);
   };
+
+  signal.changeListenerCount = () => changeListeners.size;
 
   signal.emit = (newValue: Value) => {
     if (value !== newValue) {
       value = newValue;
 
-      for (const effect of changeListeners) {
-        effect();
+      for (const listener of changeListeners) {
+        listener();
       }
     }
   };
