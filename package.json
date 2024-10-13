@@ -14,7 +14,6 @@
   "type": "module",
   "module": "./output/index.js",
   "types": "./output/index.d.ts",
-  "bin": "./output/bin/index.js",
   "exports": {
     ".": "./output/index.js"
   },
@@ -42,8 +41,7 @@
     "test": "pnpm vitest run",
     "test:watch": "pnpm vitest watch",
     "test:coverage": "pnpm vitest run --coverage",
-    "release": "semantic-release --branches main",
-    "bin:reactive": "node ./output/bin/index.js"
+    "release": "semantic-release --branches main"
   },
   "devDependencies": {
     "@skarab/eslint-config": "^5.0.0",

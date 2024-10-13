@@ -1,1 +1,1 @@
-export const api = { life: 42 };
+export * from "./signal.js";
