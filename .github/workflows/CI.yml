@@ -1,0 +1,75 @@
+name: Test & Release
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - '*'
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    strategy:
+      fail-fast: false
+      matrix:
+        node-version: [18, 20, 22]
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    name: Test on node ${{ matrix.node-version }} and ${{ matrix.os }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Install pnpm version 9
+        uses: pnpm/action-setup@v2
+        with:
+          version: 9
+      - name: Set node version to ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          cache: 'pnpm'
+          node-version: ${{ matrix.node-version }}
+      - name: Install dependencies
+        run: pnpm install
+      - name: Format source
+        run: pnpm format
+      - name: Lint source
+        run: pnpm lint
+      - name: Build source
+        run: pnpm build
+      - name: Test source
+        run: pnpm test
+
+  # release:
+  #   needs: test
+  #   if: ${{ github.repository == 'skarab42/reactive' && github.ref == 'refs/heads/main'  }}
+  #   runs-on: ubuntu-latest
+  #   permissions:
+  #     contents: write
+  #     issues: write
+  #     pull-requests: write
+  #     id-token: write
+  #   name: Release package on npm registry
+  #   steps:
+  #     - name: Checkout
+  #       uses: actions/checkout@v4
+  #     - name: Install pnpm version 9
+  #       uses: pnpm/action-setup@v2
+  #       with:
+  #         version: 9
+  #     - name: Set node version to 18
+  #       uses: actions/setup-node@v4
+  #       with:
+  #         node-version: 18
+  #     - name: Install dependencies
+  #       run: pnpm install
+  #     - name: Build source
+  #       run: pnpm build
+  #     - name: Release package
+  #       run: pnpm release
+  #       env:
+  #         NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+  #         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

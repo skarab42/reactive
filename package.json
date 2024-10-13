@@ -1,0 +1,83 @@
+{
+  "name": "@skarab/reactive",
+  "description": "My skaffolded project",
+  "version": "0.0.0-development",
+  "license": "MIT",
+  "author": {
+    "name": "skarab42",
+    "email": "skarab@bluewin.ch"
+  },
+  "funding": "https://github.com/sponsors/skarab42",
+  "homepage": "https://github.com/skarab42/reactive",
+  "repository": "https://github.com/skarab42/reactive",
+  "bugs": "https://github.com/skarab42/reactive/issues",
+  "type": "module",
+  "module": "./output/index.js",
+  "types": "./output/index.d.ts",
+  "bin": "./output/bin/index.js",
+  "exports": {
+    ".": "./output/index.js"
+  },
+  "private": true,
+  "publishConfig": {
+    "access": "restricted"
+  },
+  "files": [
+    "output"
+  ],
+  "keywords": [
+    "skaffold"
+  ],
+  "scripts": {
+    "prepare": "npx simple-git-hooks",
+    "clean": "rimraf ./output",
+    "lint": "eslint . --max-warnings=0",
+    "lint:fix": "pnpm lint --fix",
+    "format": "pnpm format:run --check",
+    "format:run": "prettier **/* --ignore-unknown",
+    "format:write": "pnpm format:run --write",
+    "build": "pnpm clean && tsc -p ./tsconfig.build.json",
+    "build:check": "tsc -p ./tsconfig.json",
+    "build:watch": "pnpm build --watch",
+    "test": "pnpm vitest run",
+    "test:watch": "pnpm vitest watch",
+    "test:coverage": "pnpm vitest run --coverage",
+    "release": "semantic-release --branches main",
+    "bin:reactive": "node ./output/bin/index.js"
+  },
+  "devDependencies": {
+    "@skarab/eslint-config": "^5.0.0",
+    "@skarab/eslint-staged": "^1.0.0",
+    "@skarab/prettier-config": "^1.2.2",
+    "@skarab/typescript-config": "^3.1.0",
+    "@types/node": "^20.16.11",
+    "@vitest/coverage-v8": "^1.6.0",
+    "eslint": "^8.57.1",
+    "lint-staged": "^15.2.10",
+    "prettier": "^3.3.3",
+    "rimraf": "^5.0.10",
+    "semantic-release": "^22.0.12",
+    "simple-git-hooks": "^2.11.1",
+    "typescript": "^5.6.3",
+    "vitest": "^1.6.0"
+  },
+  "engines": {
+    "node": "^18 || ^20 || >=22",
+    "pnpm": ">=9"
+  },
+  "packageManager": "pnpm@9.4.0",
+  "prettier": "@skarab/prettier-config",
+  "eslintConfig": {
+    "root": true,
+    "extends": "@skarab/eslint-config/recommended"
+  },
+  "lint-staged": {
+    "*": [
+      "pnpm eslint-staged --fix --max-warnings=0",
+      "pnpm prettier --write --ignore-unknown"
+    ]
+  },
+  "simple-git-hooks": {
+    "pre-commit": "pnpm lint-staged"
+  }
+}
