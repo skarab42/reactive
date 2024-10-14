@@ -1,3 +1,4 @@
+import { effectSubscribers } from './effect-subscribers.js';
 
 export type SignalChangeListener = () => void;
 export type SignalSubscription = { subscribe: () => void; unsubscribe: () => void };
@@ -26,6 +27,13 @@ export function createSignal<Value>(value: Value): Signal<Value> {
   }
 
   function signal(): Value {
+    const lastIndex = effectSubscribers.length - 1;
+    const subscriber = effectSubscribers[lastIndex];
+
+    if (subscriber && !changeListeners.has(subscriber.effect)) {
+      subscriber.subscription = subscribe(subscriber.effect);
+    }
+
     return value;
   }
 
