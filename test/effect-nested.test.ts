@@ -102,3 +102,56 @@ it('should not loop indefinitely when signals are used recursively', () => {
   expect(setTail).toHaveBeenCalledTimes(5);
   expect(setTail).toHaveBeenLastCalledWith('head: 1 | tail: 1');
 });
+
+it('should unsubscribe from nested effect', () => {
+  const headSignal = createSignal(0);
+  const bodySignal = createSignal(0);
+  const tailSignal = createSignal(0);
+
+  const setHead = vi.fn();
+  const setBody = vi.fn();
+  const setTail = vi.fn();
+
+  const tailEffect: Effect = () => {
+    setTail(`head: ${headSignal.value()} | body: ${bodySignal.value()} | tail: ${tailSignal()}`);
+  };
+
+  const bodyEffect: Effect = () => {
+    setBody(`head: ${headSignal.value()} | body: ${bodySignal()} | tail: ${tailSignal.value()}`);
+    createEffect(tailEffect);
+  };
+
+  const headEffect: Effect = () => {
+    setHead(`head: ${headSignal()} | body: ${bodySignal.value()} | tail: ${tailSignal.value()}`);
+    createEffect(bodyEffect);
+  };
+
+  const { unsubscribe } = createEffect(headEffect);
+
+  expect(setHead).toHaveBeenCalledTimes(1);
+  expect(setBody).toHaveBeenCalledTimes(1);
+  expect(setTail).toHaveBeenCalledTimes(1);
+
+  headSignal.emit(headSignal.value() + 1);
+
+  expect(setHead).toHaveBeenCalledTimes(2);
+  expect(setBody).toHaveBeenCalledTimes(2);
+  expect(setTail).toHaveBeenCalledTimes(2);
+
+  unsubscribe();
+
+  headSignal.emit(headSignal.value() + 1);
+
+  expect(setHead).toHaveBeenCalledTimes(2);
+  expect(setBody).toHaveBeenCalledTimes(2);
+  expect(setTail).toHaveBeenCalledTimes(2);
+
+  // should unsubscribe child effects
+  headSignal.emit(headSignal.value() + 1);
+  bodySignal.emit(bodySignal.value() + 1);
+  tailSignal.emit(tailSignal.value() + 1);
+
+  expect(setHead).toHaveBeenCalledTimes(2);
+  expect(setBody).toHaveBeenCalledTimes(2);
+  expect(setTail).toHaveBeenCalledTimes(2);
+});

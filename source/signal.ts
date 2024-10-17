@@ -31,7 +31,7 @@ export function createSignal<Value>(value: Value): Signal<Value> {
     const subscriber = effectSubscribers[lastIndex];
 
     if (subscriber && !changeListeners.has(subscriber.effect)) {
-      subscriber.subscription = subscribe(subscriber.effect);
+      subscriber.subscriptions.push(subscribe(subscriber.effect));
     }
 
     return value;
